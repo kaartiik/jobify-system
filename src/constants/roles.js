@@ -1,2 +1,2 @@
-export const ADMIN = 'ADMIN';
-export const SECURITY = 'SECURITY';
+export const JOB_SEEKER = 'job_seeker';
+export const EMPLOYER = 'employer';

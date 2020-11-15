@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Avatar, Modal, Backdrop, Fade, IconButton } from '@material-ui/core';
+import {
+  Avatar,
+  Modal,
+  Backdrop,
+  Fade,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
@@ -30,9 +40,21 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
+  formSpacing: {
+    margin: 25,
+  },
+  selectSize: {
+    width: 220,
+  },
 }));
 
-const UserDetailsModal = ({ userData, isOpen, toClose }) => {
+const UserDetailsModal = ({
+  userData,
+  isOpen,
+  toClose,
+  status,
+  onStatusChange,
+}) => {
   const classes = useStyles();
 
   return (
@@ -63,10 +85,37 @@ const UserDetailsModal = ({ userData, isOpen, toClose }) => {
             </div>
             <div className={classes.flexRow}>
               <div>
-                <h4>Full Name: {userData.name}</h4>
-                <h4>Unit(s): {userData.unit}</h4>
-                <h4>Mobile: {userData.phone}</h4>
-                <h4>Email: {userData.email}</h4>
+                <h4>Full Name: {userData.user_fullname}</h4>
+                <h4>Mobile: {userData.user_phone_number}</h4>
+                <h4>Email: {userData.user_email}</h4>
+                <h4>Job Title: {userData.job_title}</h4>
+                <h4>Job Description: {userData.job_description}</h4>
+                <h4>Job Type: {userData.job_type}</h4>
+                <h4>Application Status: {userData.application_status}</h4>
+
+                <div className={classes.formSpacing}>
+                  <FormControl variant="outlined">
+                    <InputLabel id="demo-simple-select-outlined-label">
+                      Status
+                    </InputLabel>
+
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={status}
+                      onChange={(e) => {
+                        onStatusChange(e.target.value);
+                      }}
+                      label="Status"
+                      name="status"
+                      className={classes.selectSize}
+                    >
+                      <MenuItem value="Processing">Processing</MenuItem>
+                      <MenuItem value="Selected">Selected</MenuItem>
+                      <MenuItem value="Rejected">Rejected</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
               </div>
               {userData.avatar === 'noDP' ? (
                 <Avatar alt="User" className={classes.visitorImg} />

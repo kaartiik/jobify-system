@@ -24,10 +24,13 @@ import {
   Home,
   Menu,
   Person,
-  PersonAdd,
   ExitToApp,
   EmojiPeople,
   People,
+  Work,
+  AddCircle,
+  Settings,
+  DoneAll,
 } from '@material-ui/icons';
 
 const useStyles = makeStyles({
@@ -66,9 +69,11 @@ function Navigation({ firebase }) {
   const menuIcons = (index) => {
     if (index === 0) return <Home />;
     else if (index === 1) return <Person />;
-    else if (index === 2) return <EmojiPeople />;
-    else if (index === 3) return <PersonAdd />;
-    else if (index === 4) return <People />;
+    else if (index === 2) return <AddCircle />;
+    else if (index === 3) return <Settings />;
+    else if (index === 4) return <Work />;
+    else if (index === 5) return <DoneAll />;
+    else if (index === 6) return <People />;
   };
 
   const drawerItems = (text, index, authUser) => {
@@ -92,8 +97,8 @@ function Navigation({ firebase }) {
       );
     } else if (index === 2) {
       return (
-        (!!authUser.roles[ROLES.ADMIN] || !!authUser.roles[ROLES.SECURITY]) && (
-          <Link to={ROUTES.VISITORS} className={classes.link}>
+        authUser.user_type === ROLES.EMPLOYER && (
+          <Link to={ROUTES.POST_JOB_VACANCY} className={classes.link}>
             <ListItem button key={text}>
               <ListItemIcon>{menuIcons(index)}</ListItemIcon>
               <ListItemText primary={text} />
@@ -103,8 +108,8 @@ function Navigation({ firebase }) {
       );
     } else if (index === 3) {
       return (
-        !!authUser.roles[ROLES.SECURITY] && (
-          <Link to={ROUTES.VISITOR_REGISTRATION} className={classes.link}>
+        authUser.user_type === ROLES.EMPLOYER && (
+          <Link to={ROUTES.MANAGE_VACANCIES} className={classes.link}>
             <ListItem button key={text}>
               <ListItemIcon>{menuIcons(index)}</ListItemIcon>
               <ListItemText primary={text} />
@@ -114,8 +119,30 @@ function Navigation({ firebase }) {
       );
     } else if (index === 4) {
       return (
-        !!authUser.roles[ROLES.ADMIN] && (
-          <Link to={ROUTES.USERS} className={classes.link}>
+        authUser.user_type === ROLES.JOB_SEEKER && (
+          <Link to={ROUTES.JOB_VACANCIES} className={classes.link}>
+            <ListItem button key={text}>
+              <ListItemIcon>{menuIcons(index)}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          </Link>
+        )
+      );
+    } else if (index === 5) {
+      return (
+        authUser.user_type === ROLES.JOB_SEEKER && (
+          <Link to={ROUTES.APPLICATION_STATUS} className={classes.link}>
+            <ListItem button key={text}>
+              <ListItemIcon>{menuIcons(index)}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItem>
+          </Link>
+        )
+      );
+    } else if (index === 6) {
+      return (
+        authUser.user_type === ROLES.EMPLOYER && (
+          <Link to={ROUTES.APPLICANTS} className={classes.link}>
             <ListItem button key={text}>
               <ListItemIcon>{menuIcons(index)}</ListItemIcon>
               <ListItemText primary={text} />
@@ -139,9 +166,11 @@ function Navigation({ firebase }) {
         {[
           'Home',
           'Account',
-          'Visitors',
-          'Visitor Registration',
-          'Users',
+          'Post Job Vacancy',
+          'Manage Vacancies',
+          'Job Vacancies',
+          'Application Status',
+          'Applicants',
         ].map((text, index) => drawerItems(text, index, authUser))}
       </List>
       <Divider />

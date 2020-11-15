@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Avatar, Modal, Backdrop, Fade, IconButton } from '@material-ui/core';
+import { Button, Modal, Backdrop, Fade, IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
@@ -32,14 +32,26 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const VisitorDetailsModal = ({ visitorData, isOpen, toClose }) => {
+const VacancyDetailsModal = ({ jobData, isOpen, toClose, applyJob }) => {
   const classes = useStyles();
+
+  const handleApplyJob = () => {
+    const jobDetails = {
+      company_name: jobData.fullname,
+      job_title: jobData.job_title,
+      job_description: jobData.job_description,
+      job_type: jobData.job_type,
+      company_uid: jobData.uuid,
+      company_email: jobData.email,
+      company_phone_number: jobData.phone_number,
+    };
+
+    applyJob(jobDetails);
+  };
 
   return (
     <div>
       <Modal
-        aria-labelledby="transition-modal-title"
-        aria-describedby="transition-modal-description"
         className={classes.modal}
         open={isOpen}
         onClose={toClose}
@@ -63,37 +75,24 @@ const VisitorDetailsModal = ({ visitorData, isOpen, toClose }) => {
             </div>
             <div className={classes.flexRow}>
               <div>
-                <h4>Full Name: {visitorData.fullName}</h4>
-                {visitorData.icNumber ? (
-                  <h4>IC: {visitorData.icNumber}</h4>
-                ) : (
-                  <h4>Passport: {visitorData.passportNumber}</h4>
-                )}
-                <h4>Mobile: {visitorData.mobile}</h4>
-                {visitorData.vehicleNo && (
-                  <h4>Vehicle No: {visitorData.vehicleNo}</h4>
-                )}
-                {visitorData.purpose === 'OTHERS' ? (
-                  <h4>Other Purpose: {visitorData.others}</h4>
-                ) : (
-                  <h4>Purpose: {visitorData.purpose}</h4>
-                )}
-
-                <h4>Visiting: {visitorData.placeVisiting}</h4>
-
-                {visitorData.placeVisiting === 'UNIT' && (
-                  <h4>Unit: {visitorData.unit}</h4>
-                )}
-
-                <h4>Time: {visitorData.time}</h4>
-                <h4>Date: {visitorData.date}</h4>
+                <h4>Company: {jobData.fullname}</h4>
+                <h4>Job Title: {jobData.job_title}</h4>
+                <h4>Job Description: {jobData.job_description}</h4>
+                <h4>Job Type: {jobData.job_type}</h4>
+                <h4>Email: {jobData.email}</h4>
+                <h4>Phone Number: {jobData.phone_number}</h4>
               </div>
-              <Avatar
-                alt="Visitor"
-                variant="rounded"
-                src={visitorData.image}
-                className={classes.visitorImg}
-              />
+            </div>
+            <div className={classes.formSpacing}>
+              <Button
+                className={classes.button}
+                variant="contained"
+                color="secondary"
+                type="submit"
+                onClick={() => handleApplyJob()}
+              >
+                Apply
+              </Button>
             </div>
           </div>
         </Fade>
@@ -102,4 +101,4 @@ const VisitorDetailsModal = ({ visitorData, isOpen, toClose }) => {
   );
 };
 
-export default VisitorDetailsModal;
+export default VacancyDetailsModal;

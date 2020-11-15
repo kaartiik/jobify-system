@@ -1,4 +1,4 @@
-import React, { useEffect, useState, forwardRef } from 'react';
+import React, { useEffect, useState, forwardRef, useContext } from 'react';
 import { Helmet } from 'react-helmet';
 import MaterialTable from 'material-table';
 import {
@@ -21,10 +21,10 @@ import {
 } from '@material-ui/icons';
 import { compose } from 'recompose';
 import { withFirebase } from '../Firebase';
-import { withAuthorization } from '../Session';
+import { withAuthorization, AuthUserContext } from '../Session';
 import * as ROLES from '../../constants/roles';
 
-import VisitorDetailsModal from './VisitorDetailsModal';
+import ApplicantDetailsModal from './ApplicantDetailsModal';
 
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
@@ -51,21 +51,19 @@ const tableIcons = {
 };
 
 const columns = [
-  { title: 'Name', field: 'fullName' },
-  { title: 'IC', field: 'icNumber' },
-  { title: 'Passport', field: 'passportNumber' },
-  { title: 'Mobile', field: 'mobile' },
-  { title: 'Vehicle No', field: 'vehicleNo' },
-  { title: 'Time', field: 'time' },
-  { title: 'Date', field: 'date', defaultSort: 'desc' },
-  { title: 'Visiting', field: 'placeVisiting' },
-  { title: 'Unit', field: 'unit' },
+  { title: 'Name', field: 'user_fullname' },
+  { title: 'Job Title', field: 'job_title' },
+  { title: 'Job Type', field: 'job_type' },
+  { title: 'Mobile', field: 'user_phone_number' },
+  { title: 'Email', field: 'user_email' },
 ];
 
-function Visitors(props) {
-  const [visitors, setVisitors] = useState([]);
-  const [visitorObj, setVisitorObj] = useState();
+function Applicants(props) {
+  const authUser = useContext(AuthUserContext);
+  const [users, setUsers] = useState([]);
+  const [userObj, setUserObj] = useState();
   const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState('');
 
   const handleOpen = () => {
     setOpen(true);
@@ -75,64 +73,69 @@ function Visitors(props) {
     setOpen(false);
   };
 
-  const dateFromStr = (str) => new Date('1970/01/01 ' + str);
-
-  const getVisitorsList = () => {
-    try {
-      props.firebase.getVisitors().on('value', (snapshot) => {
-        const data = snapshot.val();
-        let toSortArr = [];
-        for (const property in data) {
-          toSortArr.push(data[property]);
-        }
-        toSortArr.sort((a, b) => dateFromStr(b.time) - dateFromStr(a.time));
-        setVisitors(toSortArr);
-      });
-    } catch (error) {
-      alert(error.message);
+  useEffect(() => {
+    if (status !== '') {
+      try {
+        props.firebase.changeApplicantStatus(
+          authUser.uuid,
+          userObj.application_uid,
+          status
+        );
+        props.firebase.changeApplicationStatus(
+          userObj.user_uid,
+          userObj.application_uid,
+          status
+        );
+      } catch (error) {
+        alert('Error updating applicant status. Please try again.');
+      }
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
 
   useEffect(() => {
-    getVisitorsList();
+    props.firebase.getApplicants(authUser.uuid).on('value', (snapshot) => {
+      if (snapshot.val() !== null || snapshot.val() !== undefined) {
+        const data = snapshot.val();
+
+        for (const property in data) {
+          setUsers((exsiting) => [...exsiting, data[property]]);
+        }
+      } else {
+        setUsers([]);
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div>
       <Helmet>
-        <title>Visitors</title>
+        <title>Applicants</title>
       </Helmet>
       <MaterialTable
-        title="Visitors List"
+        title="Applicants List"
         icons={tableIcons}
         columns={columns}
-        data={visitors}
+        data={users}
         actions={[
           {
             icon: OpenInNew,
             tooltip: 'View',
             onClick: (event, rowData) => {
-              setVisitorObj(rowData);
+              setUserObj(rowData);
               handleOpen();
             },
           },
         ]}
-        options={{
-          sorting: true,
-          filtering: true,
-          exportButton: true,
-          pageSize: 20,
-          pageSizeOptions: [20, 40, 60, 80, 100],
-          toolbar: true,
-          paging: true,
-        }}
       />
       {open && (
-        <VisitorDetailsModal
-          visitorData={visitorObj}
+        <ApplicantDetailsModal
+          userData={userObj}
           isOpen={open}
           toClose={handleClose}
+          status={status}
+          onStatusChange={setStatus}
         />
       )}
     </div>
@@ -140,7 +143,6 @@ function Visitors(props) {
 }
 
 const condition = (authUser) =>
-  authUser &&
-  (!!authUser.roles[ROLES.ADMIN] || !!authUser.roles[ROLES.SECURITY]);
+  authUser && authUser.user_type === ROLES.EMPLOYER;
 
-export default compose(withAuthorization(condition), withFirebase)(Visitors);
+export default compose(withAuthorization(condition), withFirebase)(Applicants);

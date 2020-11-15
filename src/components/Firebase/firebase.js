@@ -72,9 +72,9 @@ class Firebase {
             const dbUser = snapshot.val();
 
             // default empty roles
-            if (!dbUser.roles) {
-              dbUser.roles = {};
-            }
+            // if (!dbUser.user_type) {
+            //   dbUser.roles = {};
+            // }
 
             // merge auth and db user
             authUser = {
@@ -91,6 +91,8 @@ class Firebase {
     });
 
   // *** User API ***
+  createUser = (uid, userObject) =>
+    this.db.ref('Users').child(uid).set(userObject);
 
   user = (uid) => this.db.ref(`Users/${uid}`);
 
@@ -98,19 +100,75 @@ class Firebase {
 
   avatar = () => this.strg.ref('Users');
 
-  // *** Statements APi ***
+  // *** Vacancy API ***
 
-  statementsStrg = () => this.strg.ref('Statements');
+  generateVacancyKey = () => this.db.ref('Vacancies').push().key;
 
-  database = () => this.db;
+  postVacancy = (vacancyUid, vacancyObject) =>
+    this.db.ref('Vacancies').child(vacancyUid).set(vacancyObject);
 
-  // *** Visitors API ***
+  saveVacancyForEmployer = (userUid, vacancyUid, vacancyObject) =>
+    this.db
+      .ref('Users')
+      .child(userUid)
+      .child('Vacancies')
+      .child(vacancyUid)
+      .set(vacancyObject);
 
-  getVisitors = () => this.db.ref('Visitors');
+  getAllVacancies = () => this.db.ref('Vacancies');
 
-  imageFile = () => this.strg.ref('Visitors');
+  getEmployerVacancies = (uid) =>
+    this.db.ref('Users').child(uid).child('Vacancies');
 
-  storage = () => this.strg;
+  deleteJobVacancy = (vacancyUid) =>
+    this.db.ref('Vacancies').child(vacancyUid).remove();
+
+  deleteVacancyForEmployer = (userUid, vacancyUid) =>
+    this.db
+      .ref('Users')
+      .child(userUid)
+      .child('Vacancies')
+      .child(vacancyUid)
+      .remove();
+
+  generateApplicantKey = () => this.db.ref('Applicants').push().key;
+
+  applyJob = (companyUid, applicantKey, applicantObject) =>
+    this.db
+      .ref('Applications')
+      .child(companyUid)
+      .child(applicantKey)
+      .set(applicantObject);
+
+  saveAppliedJobForUser = (userUid, applicantKey, applicantObject) =>
+    this.db
+      .ref('Users')
+      .child(userUid)
+      .child('Applications')
+      .child(applicantKey)
+      .set(applicantObject);
+
+  getApplications = (userUid) =>
+    this.db.ref('Users').child(userUid).child('Applications');
+
+  getApplicants = (companyUid) => this.db.ref('Applications').child(companyUid);
+
+  changeApplicantStatus = (companyUid, applicationUid, status) =>
+    this.db
+      .ref('Applications')
+      .child(companyUid)
+      .child(applicationUid)
+      .child('application_status')
+      .set(status);
+
+  changeApplicationStatus = (uuid, applicationUid, status) =>
+    this.db
+      .ref('Users')
+      .child(uuid)
+      .child('Applications')
+      .child(applicationUid)
+      .child('application_status')
+      .set(status);
 }
 
 export default Firebase;

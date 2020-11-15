@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
-import { withRouter } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import { compose } from 'recompose';
 
+import { SignUpLink } from '../SignUp';
 import { PasswordForgetLink } from '../PasswordForget';
 import { withFirebase } from '../Firebase';
 import * as ROUTES from '../../constants/routes';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Button, TextField } from '@material-ui/core';
-import logo from '../../assets/MPMC.png';
 
 const styles = {
   root: {
@@ -67,8 +67,6 @@ class SignInPage extends Component {
 
     return (
       <div className={classes.root}>
-        <img src={logo} alt="Logo" height={300} width={500} />
-
         <form onSubmit={this.onSubmit}>
           <div className={classes.root}>
             <div className={classes.formSpacing}>
@@ -112,10 +110,18 @@ class SignInPage extends Component {
         </form>
 
         <PasswordForgetLink />
+
+        <SignUpLink />
       </div>
     );
   }
 }
+
+export const SignInLink = () => (
+  <p>
+    Have an account? <Link to={ROUTES.SIGN_IN}>Sign In</Link>
+  </p>
+);
 
 export default compose(
   withRouter,

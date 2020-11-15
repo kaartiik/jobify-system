@@ -20,13 +20,15 @@ function HomePage() {
       <Helmet>
         <title>Home</title>
       </Helmet>
-      <p>Welcome to MPMC Visitor Management System</p>
+      <h3>Welcome to Jobify System</h3>
+      <img src={require('../../assets/home_background.jpg')} />
     </div>
   );
 }
 
 const condition = (authUser) =>
   authUser &&
-  (!!authUser.roles[ROLES.ADMIN] || !!authUser.roles[ROLES.SECURITY]);
+  (authUser.user_type === ROLES.EMPLOYER ||
+    authUser.user_type === ROLES.JOB_SEEKER);
 
 export default withAuthorization(condition)(HomePage);
